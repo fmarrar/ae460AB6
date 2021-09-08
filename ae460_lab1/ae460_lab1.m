@@ -76,6 +76,7 @@ set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02 .02], ...
     'LineWidth', 1)
 
 set(gcf, 'Position',  [100, 100, 610, 400])
+saveas(gcf,'TPV','epsc')
 
 figID = figID + 1;
 figure(figID), clf
@@ -113,6 +114,7 @@ set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02 .02], ...
     'LineWidth', 1)
 
 set(gcf, 'Position',  [100, 100, 610, 400])
+saveas(gcf,'SPV','epsc')
 
 %% Measurement Differences
 % percent differences
@@ -123,6 +125,7 @@ MDP_pd = abs(tbl.ManometerDeltaP - q) ./ q * 100;
 
 figID = figID + 1;
 figure(figID), clf
+grid on
 hold on
 hOTDP = line(tbl.OmegaTransmitterDeltaP, q);
 set(hOTDP, 'LineStyle', 'none', 'Marker', 'o', 'MarkerSize', 5, ...
@@ -137,6 +140,9 @@ hold off
 axlim = [min(tbl.OmegaTransmitterDeltaP(1), q(1)), ...
     max(tbl.OmegaTransmitterDeltaP(end), q(end))];
 axis([axlim, axlim])
+ax = gca;
+ax.XRuler.Axle.LineWidth = 1;
+ax.YRuler.Axle.LineWidth = 1;
 
 hXLabel = xlabel('Omega Transmitter Delta P (psi)');
 hYLabel = ylabel('Actual Dynamic Pressure (psi)');
@@ -148,17 +154,18 @@ hText = text(0.0275, 0.0225, ...
 %     sprintf('{\\itq = %0.5g\\DeltaP_\\Omega}', b1));
 
 hLegend = legend([hOTDP, OTDPfit], 'Data ({\it\DeltaP_\Omega})', ...
-    'Fit ({\it\beta_1x})', 'Location', 'NorthWest');
+    'Fit ({\it\beta_0+\beta_1x})', 'Location', 'NorthWest');
 
 set(gca, 'FontName', 'Helvetica')
 set([hLegend, gca], 'FontSize', 9)
 set([hXLabel, hYLabel, hText], 'FontSize', 11)
 
 set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02 .02], ...
-    'XMinorTick', 'on', 'YMinorTick', 'on', 'XColor', [.3 .3 .3], ...
-    'YColor', [.3 .3 .3], 'LineWidth', 1)
+    'XMinorTick', 'on', 'YMinorTick', 'on', ...
+    'XColor', [.3 .3 .3], 'YColor', [.3 .3 .3])
 
 set(gcf, 'Position',  [100, 100, 520, 400])
+saveas(gcf,'OTDPfit','epsc')
 
 %%
 R = 1716; % ft-lbf/slug-R
@@ -225,6 +232,7 @@ xlabel(['\fontname{Helvetica}\fontsize{9}Motor Speed (RPM)',newline,...
 ylabel('Mach Number', 'FontSize', 9)
 
 set(gcf, 'Position',  [100, 100, 610, 420])
+saveas(gcf,'RPMtrends','epsc')
 
 %% Velocity Uncertainty
 UnPamb = 0.148/2.036;
