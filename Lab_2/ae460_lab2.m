@@ -37,9 +37,9 @@ C_a = sum(0.5*(C_p(:,1:end-1)+C_p(:,2:end)).*(y(1:end-1)-y(2:end)),2);
 % calculate x and y moment arm contributions seperately
 % sum the contributions
 tmp = C_p.*x;
-Xarm = sum(0.5*(tmp(:,1:end-1)+tmp(:,2:end).*(x(1:end-1)-x(2:end))),2);
+Xarm = sum(0.5*(tmp(:,1:end-1)+tmp(:,2:end)).*(x(1:end-1)-x(2:end)),2);
 tmp = C_p.*y;
-Yarm = sum(0.5*(tmp(:,1:end-1)+tmp(:,2:end).*(y(1:end-1)-y(2:end))),2);
+Yarm = sum(0.5*(tmp(:,1:end-1)+tmp(:,2:end)).*(y(1:end-1)-y(2:end)),2);
 C_mLE = Xarm + Yarm;
 
 % lift coefficient
@@ -97,22 +97,28 @@ ax.YAxis.LineWidth = 1;
 
 % C_l vs. AOA
 figure(3), clf
+
 lin_bndy = find(param.AOA(1:max_AOA_idx) == 6); % sample linear region
 b = [ones(lin_bndy,1) param.AOA(1:lin_bndy)] \ C_l(1:lin_bndy);
 b(2) = 2*pi/rad2deg(1); % slope from thin airfoil theory
-TAT = b(2)*param.AOA(1:max_AOA_idx) + b(1);
+TAT = b(2)*param.AOA(1:max_AOA_idx) + b(1); % TAT C_l vs. AOA
+
 hold on
 plot(param.AOA(1:max_AOA_idx), C_l(1:max_AOA_idx),...
     'LineStyle', 'none', 'Marker', 'o', 'MarkerSize', 6)
 plot(param.AOA(max_AOA_idx+1:end), C_l(max_AOA_idx+1:end),...
     'LineStyle', 'none', 'Marker', 's', 'MarkerSize', 7)
-plot(param.AOA(1:max_AOA_idx), TAT)
+plot(param.AOA(1:max_AOA_idx), TAT, 'LineStyle','-')
 hold off
 grid on
-v_padding = abs(TAT(1) - C_l(1));
+v_padding = 0.2*ceil(abs(TAT(1) - C_l(1))*5);
 axis([param.AOA(1), param.AOA(max_AOA_idx), TAT(1), max(C_l)+v_padding])
 xlabel('\alpha (deg)', 'FontSize', 12)
 ylabel('\itC_l', 'FontSize', 12)
+
+legend('{\itC_l}(\alpha\rightarrow\alpha_{max}^-)',...
+    '{\itC_l}(\alpha\rightarrow\alpha_{min}^+)',...
+    'Thin airfoil theory', 'Location', 'NorthWest')
 
 set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02,.02],...
     'XMinorTick', 'on', 'YMinorTick', 'on')
