@@ -67,7 +67,7 @@ cmap = {[0.1412, 0.5490, 0.0392]; 'blue'; [0.9490, 0.4431, 0]};
 marks = {'^', 'o', 's'};
 lines = {'-', '--'};
 [ii,jj]=ndgrid(1:numel(marks),1:numel(lines));
-% output marker and line style pairs
+% generate marker and line style pairs
 style = arrayfun(@(x,y) [marks(y) lines(x)],jj(:),ii(:),'un',0);
 
 % C_p vs. x/c (linear region)
@@ -78,8 +78,8 @@ max_AOA_idx = find(param.AOA == max(param.AOA));
 % grab C_p distributions for increasing AOA
 selection = [-4,0,4,8,12];
 [indices,~] = find(param.AOA(1:max_AOA_idx) == selection);
+wrap = repmat(1:3, 1, 2);
 for idx=1:length(indices)
-    wrap = repmat(1:numel(cmap), 1, 2);
     plot(x, C_p(indices(idx),:), 'LineWidth', 0.75,...
         'Color', cmap{wrap(idx)}, 'LineStyle', style{idx}{2},...
         'Marker', style{idx}{1}, 'MarkerSize', 5)
@@ -107,8 +107,8 @@ figure(2), clf
 hold on
 selection = [8,16,18,22,26];
 [indices,~] = find(param.AOA(1:max_AOA_idx) == selection);
+wrap = repmat(1:3, 1, 2);
 for idx=1:length(indices)
-    wrap = repmat(1:numel(cmap), 1, 2);
     plot(x, C_p(indices(idx),:), 'LineWidth', 0.75,...
         'Color', cmap{wrap(idx)}, 'LineStyle', style{idx}{2},...
         'Marker', style{idx}{1}, 'MarkerSize', 5)
