@@ -62,15 +62,27 @@ C_d = C_n.*sind(param.AOA) + C_a.*cosd(param.AOA);
 C_mQC = C_mLE + 0.25*C_l;
 
 %% Plotting
+% create color, marker, and line style maps
+cmap = {[0.1412, 0.5490, 0.0392]; 'blue'; [0.9490, 0.4431, 0]};
+marks = {'^', 'o', 's'};
+lines = {'-', '--'};
+[ii,jj]=ndgrid(1:numel(marks),1:numel(lines));
+% output marker and line style pairs
+style = arrayfun(@(x,y) [marks(y) lines(x)],jj(:),ii(:),'un',0);
+
 % C_p vs. x/c (linear region)
 figure(1), clf
 hold on
 % find index of maximum AOA
 max_AOA_idx = find(param.AOA == max(param.AOA));
 % grab C_p distributions for increasing AOA
-[indices,~] = find(param.AOA(1:max_AOA_idx) == [-4,0,4,8,12]);
-for idx=indices
-    plot(x, C_p(idx,:))
+selection = [-4,0,4,8,12];
+[indices,~] = find(param.AOA(1:max_AOA_idx) == selection);
+for idx=1:length(indices)
+    wrap = repmat(1:numel(cmap), 1, 2);
+    plot(x, C_p(indices(idx),:), 'LineWidth', 0.75,...
+        'Color', cmap{wrap(idx)}, 'LineStyle', style{idx}{2},...
+        'Marker', style{idx}{1}, 'MarkerSize', 5)
 end
 hold off
 set(gca, 'ydir', 'reverse')
@@ -78,6 +90,9 @@ grid on
 
 xlabel('\itx/c', 'FontSize', 12)
 ylabel('\itC_p', 'FontSize', 12)
+
+legend('\alpha=' + string(selection) + '^\circ',...
+    'Location', 'NorthEast', 'FontSize', 9)
 
 set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02,.02],...
     'XMinorTick', 'on', 'YMinorTick','on')
@@ -90,9 +105,13 @@ ax.YAxis.LineWidth = 1;
 % C_p vs. x/c (near/at stall)
 figure(2), clf
 hold on
-[indices,~] = find(param.AOA(1:max_AOA_idx) == [8,16,20,22,26]);
-for idx=indices
-    plot(x, C_p(idx,:))
+selection = [8,16,18,22,26];
+[indices,~] = find(param.AOA(1:max_AOA_idx) == selection);
+for idx=1:length(indices)
+    wrap = repmat(1:numel(cmap), 1, 2);
+    plot(x, C_p(indices(idx),:), 'LineWidth', 0.75,...
+        'Color', cmap{wrap(idx)}, 'LineStyle', style{idx}{2},...
+        'Marker', style{idx}{1}, 'MarkerSize', 5)
 end
 hold off
 set(gca, 'ydir', 'reverse')
@@ -100,6 +119,9 @@ grid on
 
 xlabel('\itx/c', 'FontSize', 12)
 ylabel('\itC_p', 'FontSize', 12)
+
+legend('\alpha=' + string(selection) + '^\circ',...
+    'Location', 'NorthEast', 'FontSize', 9)
 
 set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02,.02],...
     'XMinorTick', 'on', 'YMinorTick', 'on')
@@ -146,13 +168,11 @@ ax = gca;
 ax.XAxis.LineWidth = 1;
 ax.YAxis.LineWidth = 1;
 
-
-%% Skeleton
-
 % quarter-chord pitching moment vs. AOA
 figure(4), clf
 hold on
-plot(param.AOA, C_mQC)
+plot(param.AOA, C_mQC, 'LineStyle', 'none', 'LineWidth', 0.75,...
+    'Color', 'blue', 'Marker', 's', 'MarkerSize', 5)
 hold off
 grid on
 
