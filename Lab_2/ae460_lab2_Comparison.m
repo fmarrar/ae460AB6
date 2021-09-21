@@ -169,7 +169,8 @@ grid on
 
 xlabel('\alpha (deg)', 'FontSize', 12)
 ylabel('\itC_{m_{c/4}}', 'FontSize', 12)
-legend('Clark Y14 ','NACA 0012','NACA 25112','NACA 64-008A', 'Location', 'SouthEast', 'FontSize', 9)
+xlim([-16 26])
+legend('Clark Y14 ','NACA 0012','NACA 25112','NACA 64-008A', 'Location', 'SouthWest', 'FontSize', 9)
 
 set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02,.02],...
     'XMinorTick', 'on', 'YMinorTick', 'on')
