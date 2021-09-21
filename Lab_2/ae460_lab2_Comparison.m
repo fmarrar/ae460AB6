@@ -1,4 +1,4 @@
-% ae460_lab2.m ... Code for Lab 2
+% ae460_lab2_Comparison.m ... Airfoil comparisons for Lab 2
 
 % clean up
 clear
@@ -9,43 +9,13 @@ set(0,'defaultaxesfontsize',10)
 set(0,'defaultFigurePosition',[360 198 450 350])
 
 %% Import data
+% experimental data file
 filename = 'catch_22.csv'; % file to read from
 % environment
 opts = detectImportOptions(filename, 'Range', 'A:G'); % select parameters
 opts.DataLines = 6; % data start line
 varNames = {'DataPoint','AOA','q_WT_corr',...
     'q_corr_fac','AmbTemp','AmbPress','Re'}; % set valid variable names
-
-%second airfoil read
-filename2 = 'naca0012.csv';
-opts2 = detectImportOptions(filename2, 'Range', 'A:G'); % select parameters
-varNames2 = {'Alpha','Cl','Cd',...
-    'Cdp','Cm','Top_Xtr','Bot_Xtr'};
-param2 = readtable(filename2, opts2);
-param2.Properties.VariableNames = varNames2; % apply variable names
-opts2 = detectImportOptions(filename, 'Range', 'J4'); % x/c, y/c, pressures
-dist2 = readtable(filename2,opts2);
-
-%third airfoil read
-filename3 = 'naca25112-200000.csv';
-opts3 = detectImportOptions(filename3, 'Range', 'A:G'); % select parameters
-varNames3 = {'Alpha','Cl','Cd',...
-    'Cdp','Cm','Top_Xtr','Bot_Xtr'};
-param3 = readtable(filename3, opts3);
-param3.Properties.VariableNames = varNames3; % apply variable names
-opts3 = detectImportOptions(filename, 'Range', 'J4'); % x/c, y/c, pressures
-dist3 = readtable(filename3,opts3);
-
-%fourth airfoil read
-filename4 = 'n64008a-200000.csv';
-opts4 = detectImportOptions(filename4, 'Range', 'A:G'); % select parameters
-varNames4 = {'Alpha','Cl','Cd',...
-    'Cdp','Cm','Top_Xtr','Bot_Xtr'};
-param4 = readtable(filename4, opts4);
-param4.Properties.VariableNames = varNames4; % apply variable names
-opts4 = detectImportOptions(filename, 'Range', 'J4'); % x/c, y/c, pressures
-dist4 = readtable(filename4,opts4);
-
 param = readtable(filename, opts); % read data using options
 param.Properties.VariableNames = varNames; % apply variable names
 % airfoil
@@ -56,17 +26,23 @@ x = dist{1,:}; % x/c
 y = dist{2,:}; % y/c
 DeltaP = dist{3:end,:}; % differential pressures
 
-%% Additional parameters
-% in imperial units
-T0 = 518.67;
-R0 = 1716.554;
-mu0 = 3.62E-7;
-% dynamic viscosity
-mu = mu0*(param.AmbTemp/T0).^1.5 .* (T0+198.72)./(param.AmbTemp+198.72);
-rho = param.AmbPress*144./param.AmbTemp/R0; % freestream density
-V_inf = sqrt(2*param.q_WT_corr*144./rho); % freestream velocity
-Mach = V_inf./sqrt(1.4*R0*param.AmbTemp); % Mach number
-Re_calc = rho.*V_inf*3.5/12./mu; % calculated Reynolds number
+% second airfoil read
+filename = 'naca0012.csv';
+opts = detectImportOptions(filename, 'NumHeaderLines', 1);
+opts.VariableNamesLine = 1; % row number which has variable names
+foil2 = readtable(filename, opts);
+
+% third airfoil read
+filename = 'naca25112-200000.csv';
+opts = detectImportOptions(filename, 'NumHeaderLines', 1);
+opts.VariableNamesLine = 1;
+foil3 = readtable(filename, opts);
+
+% fourth airfoil read
+filename = 'n64008a-200000.csv';
+opts = detectImportOptions(filename, 'NumHeaderLines', 11);
+opts.VariableNamesLine = 11;
+foil4 = readtable(filename, opts);
 
 %% Calculate coefficients
 % pressure coefficient
@@ -93,50 +69,34 @@ C_d = C_n.*sind(param.AOA) + C_a.*cosd(param.AOA);
 C_mQC = C_mLE + 0.25*C_l;
 
 %% Plotting
-% create color, marker, and line style maps
-cmap = {[0.1412, 0.5490, 0.0392]; 'blue'; [0.9490, 0.4431, 0]};
-mfill = [cmap; strcat(cell(size(cmap)),'none')];
-marks = {'^', 'o', 's'};
-lines = {'-', '--'};
-[ii,jj]=ndgrid(1:numel(marks),1:numel(lines));
-% generate marker and line style pairs
-style = arrayfun(@(x,y) [marks(y) lines(x)],jj(:),ii(:),'un',0);
-
 % find index of maximum AOA
 max_AOA_idx = find(param.AOA == max(param.AOA));
 
 % C_l vs. AOA
 figure(3), clf
-
-lin_bndy = find(param.AOA(1:max_AOA_idx) == 6); % sample linear region
-b = [ones(lin_bndy,1) param.AOA(1:lin_bndy)] \ C_l(1:lin_bndy);
-b(2) = 2*pi/rad2deg(1); % slope from thin airfoil theory
-TAT = b(2)*param.AOA(1:max_AOA_idx) + b(1); % TAT C_l vs. AOA
-
 hold on
 plot(param.AOA(1:max_AOA_idx), C_l(1:max_AOA_idx),...
     'LineStyle', 'none', 'Color', [0.1412, 0.5490, 0.0392],...
     'Marker', 'o', 'MarkerSize', 5, 'LineWidth', 0.75)
-%plot 2nd, 3rd, 4th Cl data
-plot(param2.Alpha, param2.Cl,...
+% plot 2nd, 3rd, 4th Cl data
+plot(foil2.Alpha, foil2.Cl,...
     'LineStyle', 'none', 'Color', [0.9063 0.2891 0.1523],...
     'Marker', '^', 'MarkerSize', 5, 'LineWidth', 0.75)
-plot(param3.Alpha, param3.Cl,...
+plot(foil3.Alpha, foil3.Cl,...
     'LineStyle', 'none', 'Color', [0.4940 0.1840 0.5560],...
     'Marker', 'h', 'MarkerSize', 5, 'LineWidth', 0.75)
-plot(param4.Alpha, param4.Cl,...
+plot(foil4.Alpha, foil4.Cl,...
     'LineStyle', 'none', 'Color', [0.6350 0.0780 0.1840],...
     'Marker', '.', 'MarkerSize', 10, 'LineWidth', 0.75)
 hold off
 grid on
 
-v_padding = 0.2*ceil(abs(TAT(1) - C_l(1))*5);
-axis([param.AOA(1), param.AOA(max_AOA_idx), TAT(1), max(C_l)+v_padding])
+xlim([param.AOA(1), param.AOA(max_AOA_idx)])
 xlabel('\alpha (deg)', 'FontSize', 12)
 ylabel('\itC_l', 'FontSize', 12)
 
-legend('Clark Y14',...
-    'NACA 0012','NACA 25112','NACA 64-008A', 'Location', 'SouthEast', 'FontSize', 9)
+legend('Clark Y14', 'NACA 0012', 'NACA 25112', 'NACA 64-008A',...
+    'Location', 'SouthEast', 'FontSize', 9)
 
 set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02,.02],...
     'XMinorTick', 'on', 'YMinorTick', 'on')
@@ -153,14 +113,14 @@ figure(4), clf
 hold on
 plot(param.AOA, C_mQC, 'LineStyle', 'none', 'Color', [0.1412, 0.5490, 0.0392],...
     'Marker', 'o', 'MarkerSize', 5, 'LineWidth', 0.75)
-%plot 2nd, 3rd, 4th Cm data
-plot(param2.Alpha, param2.Cm,...
+% plot 2nd, 3rd, 4th Cm data
+plot(foil2.Alpha, foil2.Cm,...
     'LineStyle', 'none', 'Color', [0.9063 0.2891 0.1523],...
     'Marker', '^', 'MarkerSize', 3, 'LineWidth', 0.75)
-plot(param3.Alpha, param3.Cm,...
+plot(foil3.Alpha, foil3.Cm,...
     'LineStyle', 'none', 'Color', [0.4940 0.1840 0.5560],...
     'Marker', 'h', 'MarkerSize', 3, 'LineWidth', 0.75)
-plot(param4.Alpha, param4.Cm,...
+plot(foil4.Alpha, foil4.Cm,...
     'LineStyle', 'none', 'Color', [0.6350 0.0780 0.1840],...
     'Marker', '.', 'MarkerSize', 10, 'LineWidth', 0.75)
 
