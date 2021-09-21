@@ -25,6 +25,26 @@ x = dist{1,:}; % x/c
 y = dist{2,:}; % y/c
 DeltaP = dist{3:end,:}; % differential pressures
 
+
+% load comparison airfoil data
+% read second airfoil
+filename = 'naca0012.csv';
+opts = detectImportOptions(filename, 'NumHeaderLines', 1);
+opts.VariableNamesLine = 1; % row number which has variable names
+foil2 = readtable(filename, opts);
+
+% read third airfoil
+filename = 'naca25112-200000.csv';
+opts = detectImportOptions(filename, 'NumHeaderLines', 1);
+opts.VariableNamesLine = 1;
+foil3 = readtable(filename, opts);
+
+% read fourth airfoil
+filename = 'n64008a-200000.csv';
+opts = detectImportOptions(filename, 'NumHeaderLines', 11);
+opts.VariableNamesLine = 11;
+foil4 = readtable(filename, opts);
+
 %% Additional parameters
 % in imperial units
 T0 = 518.67;
@@ -79,7 +99,7 @@ max_AOA_idx = find(param.AOA == max(param.AOA));
 % grab C_p distributions for increasing AOA
 selection = [-4,0,4,8,12];
 [indices,~] = find(param.AOA(1:max_AOA_idx) == selection);
-wrap = repmat(1:3, 1, 2);
+wrap = repmat(1:numel(cmap), 1, 2);
 for idx=1:length(indices)
     plot(x, C_p(indices(idx),:), 'LineWidth', 0.75,...
         'Color', cmap{wrap(idx)}, 'LineStyle', style{idx}{2},...
@@ -111,7 +131,6 @@ figure(2), clf
 hold on
 selection = [8,16,18,22,26];
 [indices,~] = find(param.AOA(1:max_AOA_idx) == selection);
-wrap = repmat(1:3, 1, 2);
 for idx=1:length(indices)
     plot(x, C_p(indices(idx),:), 'LineWidth', 0.75,...
         'Color', cmap{wrap(idx)}, 'LineStyle', style{idx}{2},...
@@ -154,7 +173,7 @@ plot(param.AOA(max_AOA_idx+1:end), C_l(max_AOA_idx+1:end),...
     'LineStyle', 'none', 'Color', 'blue',...
     'Marker', 's', 'MarkerSize', 5, 'LineWidth', 0.75)
 plot(param.AOA(1:max_AOA_idx), TAT, 'LineStyle','-',...
-    'Color', [0.9490, 0.4431, 0])
+    'Color', [0.9490, 0.4431, 0], 'LineWidth', 0.75)
 hold off
 grid on
 
@@ -197,3 +216,76 @@ ax.XAxis.LineWidth = 1;
 ax.YAxis.LineWidth = 1;
 
 saveas(gcf,'CmQC','epsc')
+
+
+% ------// Comparison plots //------
+Alphas = [param.AOA(:); foil2.Alpha(:); foil3.Alpha(:); foil4.Alpha(:)];
+
+% C_l vs. AOA
+figure(5), clf
+hold on
+plot(param.AOA(1:max_AOA_idx), C_l(1:max_AOA_idx),...
+    'LineStyle', 'none', 'Color', [0.1412, 0.5490, 0.0392],...
+    'Marker', 'o', 'MarkerSize', 5, 'LineWidth', 0.75)
+% plot 2nd, 3rd, 4th Cl data
+plot(foil2.Alpha, foil2.Cl,...
+    'LineStyle', 'none', 'Color', [0.9063 0.2891 0.1523],...
+    'Marker', '^', 'MarkerSize', 5, 'LineWidth', 0.75)
+plot(foil3.Alpha, foil3.Cl,...
+    'LineStyle', 'none', 'Color', [0.4940 0.1840 0.5560],...
+    'Marker', 'h', 'MarkerSize', 5, 'LineWidth', 0.75)
+plot(foil4.Alpha, foil4.Cl,...
+    'LineStyle', 'none', 'Color', [0.6350 0.0780 0.1840],...
+    'Marker', '.', 'MarkerSize', 10, 'LineWidth', 0.75)
+hold off
+grid on
+
+xlim([param.AOA(1), param.AOA(max_AOA_idx)])
+xlabel('\alpha (deg)', 'FontSize', 12)
+ylabel('\itC_l', 'FontSize', 12)
+
+legend('Clark Y14', 'NACA 0012', 'NACA 25112', 'NACA 64-008A',...
+    'Location', 'SouthEast', 'FontSize', 9)
+
+set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02,.02],...
+    'XMinorTick', 'on', 'YMinorTick', 'on')
+set(get(gca,'ylabel'), 'rotation', 0,...
+    'VerticalAlignment', 'middle', 'HorizontalAlignment', 'right')
+ax = gca;
+ax.XAxis.LineWidth = 1;
+ax.YAxis.LineWidth = 1;
+
+saveas(gcf,'ClComparison','epsc')
+
+% quarter-chord pitching moment vs. AOA
+figure(6), clf
+hold on
+plot(param.AOA, C_mQC, 'LineStyle', 'none', 'Color', [0.1412, 0.5490, 0.0392],...
+    'Marker', 'o', 'MarkerSize', 5, 'LineWidth', 0.75)
+% plot 2nd, 3rd, 4th Cm data
+plot(foil2.Alpha, foil2.Cm,...
+    'LineStyle', 'none', 'Color', [0.9063 0.2891 0.1523],...
+    'Marker', '^', 'MarkerSize', 3, 'LineWidth', 0.75)
+plot(foil3.Alpha, foil3.Cm,...
+    'LineStyle', 'none', 'Color', [0.4940 0.1840 0.5560],...
+    'Marker', 'h', 'MarkerSize', 3, 'LineWidth', 0.75)
+plot(foil4.Alpha, foil4.Cm,...
+    'LineStyle', 'none', 'Color', [0.6350 0.0780 0.1840],...
+    'Marker', '.', 'MarkerSize', 10, 'LineWidth', 0.75)
+hold off
+grid on
+
+xlabel('\alpha (deg)', 'FontSize', 12)
+ylabel('\itC_{m_{c/4}}', 'FontSize', 12)
+xlim([min(Alphas), max(Alphas)])
+legend('Clark Y14 ','NACA 0012','NACA 25112','NACA 64-008A', 'Location', 'SouthWest', 'FontSize', 9)
+
+set(gca, 'Box', 'off', 'TickDir', 'out', 'TickLength', [.02,.02],...
+    'XMinorTick', 'on', 'YMinorTick', 'on')
+set(get(gca,'ylabel'), 'rotation', 0,...
+    'VerticalAlignment', 'middle', 'HorizontalAlignment', 'right')
+ax = gca;
+ax.XAxis.LineWidth = 1;
+ax.YAxis.LineWidth = 1;
+
+saveas(gcf,'CmQCComparison','epsc')
