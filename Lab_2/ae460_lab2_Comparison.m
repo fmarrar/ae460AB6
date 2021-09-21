@@ -154,7 +154,7 @@ ax = gca;
 ax.XAxis.LineWidth = 1;
 ax.YAxis.LineWidth = 1;
 
-saveas(gcf,'Cl','epsc')
+saveas(gcf,'ClComparison','epsc')
 
 % quarter-chord pitching moment vs. AOA
 figure(4), clf
@@ -187,4 +187,4 @@ ax = gca;
 ax.XAxis.LineWidth = 1;
 ax.YAxis.LineWidth = 1;
 
-saveas(gcf,'CmQC','epsc')
+saveas(gcf,'CmQCComparison','epsc')
